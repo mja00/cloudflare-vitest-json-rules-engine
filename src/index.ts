@@ -1,18 +1,47 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.toml`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import { Engine } from 'json-rules-engine';
+
+let engine = new Engine();
+
+engine.addRule({
+	conditions: {
+		any: [{
+			all: [{
+				fact: 'gameDuration',
+				operator: 'equal',
+				value: 40
+			}, {
+				fact: 'personalFoulCount',
+				operator: 'greaterThanInclusive',
+				value: 5
+			}]
+		}, {
+			all: [{
+				fact: 'gameDuration',
+				operator: 'equal',
+				value: 48
+			}, {
+				fact: 'personalFoulCount',
+				operator: 'greaterThanInclusive',
+				value: 6
+			}]
+		}]
+	},
+	event: {  // define the event to fire when the conditions evaluate truthy
+		type: 'fouledOut',
+		params: {
+			message: 'Player has fouled out!'
+		}
+	}
+});
+
+let facts = {
+	personalFoulCount: 6,
+	gameDuration: 40
+}
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
+		engine.run(facts).then(console.log);
 		return new Response('Hello World!');
 	},
 } satisfies ExportedHandler<Env>;
