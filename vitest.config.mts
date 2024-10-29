@@ -7,5 +7,10 @@ export default defineWorkersConfig({
 				wrangler: { configPath: './wrangler.toml' },
 			},
 		},
+		server: {
+			deps: {
+				inline: ['json-rules-engine'],
+			}
+		}
 	},
 });
